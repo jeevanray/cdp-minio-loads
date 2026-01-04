@@ -1,0 +1,45 @@
+{
+  "jobs": [
+    {
+      "job_name": "unified_customer_feed",
+      "target_table_name": "iceberg.gold.customer_final",
+      "primary_keys": ["customer_id", "region_code"],
+      "sources": [
+        {
+          "source_table": "ext_tables.crm_us.users",
+          "staging_table": "iceberg.staging.stg_crm_us",
+          "use_stage": true,
+          "watermark_column": "updated_at",
+          "extract_sql": "SELECT {columns} FROM ext_tables.crm_us.users WHERE updated_at > CAST('{watermark}' AS TIMESTAMP)"
+        },
+        {
+          "source_table": "ext_tables.crm_eu.users",
+          "staging_table": "iceberg.staging.stg_crm_eu",
+          "use_stage": true,
+          "watermark_column": "last_modified",
+          "extract_sql": "SELECT {columns} FROM ext_tables.crm_eu.users WHERE last_modified > CAST('{watermark}' AS TIMESTAMP)"
+        }
+      ]
+    }
+  ],
+  "final_table": {
+    "name": "mydb.final_table",
+    "primary_keys": ["id"],
+    "column_mappings": {
+      "id": {
+        "source": "id"
+      },
+      "username": {
+        "source": "user_name"
+      },
+      "created_at": {
+        "source": "created_date",
+        "cast": "TIMESTAMP"
+      },
+      "amount": {
+        "source": "amt",
+        "cast": "DOUBLE"
+      }
+    }
+  }
+}
