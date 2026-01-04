@@ -1,0 +1,15 @@
+{
+  "jobs": [
+    {
+      "job_name": "campaign_data_load",
+      "target_table_name": "minio.segmentdb_6550.final_table",
+      "primary_keys": ["AUDIENCE_ID", "CAMPAIGN_CODE", "contactdatetime"],
+      "source": {
+        "table": "email_send",
+        "app_id": 2,
+        "watermark_column": "SENT_TIMESTAMP",
+        "extract_sql": "SELECT b.AUDIENCE_ID, b.CAMPAIGN_CODE, b.SENT_TIMESTAMP as contactdatetime, a.EVENT_INSERT_TIME_STAMP as responsedatetime, 'EMAIL' as CHANNEL_NAME, a.EVENT_NAME as RESPONSETYPECODE FROM email_send b LEFT JOIN email_staging a ON a.EMAIL_ADDRESS = b.EMAIL_ADDRESS AND b.RUN_ID = a.XAPI_HEADER AND b.SENT_TIMESTAMP <= a.EVENT_INSERT_TIME_STAMP WHERE b.CAMPAIGN_CODE = '{campaign_code}' AND b.SOURCE_APP = 2 AND b.SENT_TIMESTAMP > CAST('{watermark}' AS TIMESTAMP)"
+      }
+    }
+  ]
+}
